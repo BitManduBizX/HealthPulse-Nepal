@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Language, TRANSLATIONS } from '../translations';
 import { ChatMessage } from '../types';
+import { generateLocalAssistantResponse } from '../utils/localAssistant';
 
 interface AiAssistantProps {
   isOpen: boolean;
@@ -85,6 +86,9 @@ export const AiAssistant: React.FC<AiAssistantProps> = ({
     setIsLoading(true);
 
     try {
+      const envApiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
+      const effectiveKey = customApiKey || envApiKey || undefined;
+
       const response = await fetch('/api/gemini/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -92,7 +96,7 @@ export const AiAssistant: React.FC<AiAssistantProps> = ({
           message: text,
           history: messages.map((m) => ({ role: m.role, content: m.content })),
           language,
-          customApiKey: customApiKey || undefined,
+          customApiKey: effectiveKey,
         }),
       });
 
@@ -111,17 +115,17 @@ export const AiAssistant: React.FC<AiAssistantProps> = ({
 
       setMessages((prev) => [...prev, botReply]);
     } catch (err: any) {
-      console.error('Chat error:', err);
-      const errorMsg: ChatMessage = {
+      console.warn('API route unavailable or error encountered, providing local intelligence response:', err);
+      // Fallback for static hosts or network errors
+      const fallbackText = generateLocalAssistantResponse(text, language);
+      const fallbackMsg: ChatMessage = {
         id: String(Date.now() + 1),
         role: 'assistant',
-        content:
-          language === 'ne'
-            ? 'क्षमा गर्नुहोस्, अनुरोध पूरा गर्न सकिएन। आकस्मिक अवस्थामा तुरुन्त १०२ मा फोन गर्नुहोस्।'
-            : 'Sorry, unable to process right now. For emergencies, immediately dial 102.',
+        content: fallbackText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        source: 'local_guidance_fallback',
       };
-      setMessages((prev) => [...prev, errorMsg]);
+      setMessages((prev) => [...prev, fallbackMsg]);
     } finally {
       setIsLoading(false);
     }

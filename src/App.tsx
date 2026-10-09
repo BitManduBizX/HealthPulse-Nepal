@@ -32,7 +32,11 @@ export default function App() {
   const [aiAssistantOpen, setAiAssistantOpen] = React.useState<boolean>(false);
   const [keySettingsOpen, setKeySettingsOpen] = React.useState<boolean>(false);
   const [customApiKey, setCustomApiKey] = React.useState<string>(() => {
-    return localStorage.getItem('healthpulse_custom_gemini_key') || '';
+    return (
+      localStorage.getItem('healthpulse_custom_gemini_key') ||
+      (import.meta as any).env?.VITE_GEMINI_API_KEY ||
+      ''
+    );
   });
 
   // Clock tick every minute when in real mode
