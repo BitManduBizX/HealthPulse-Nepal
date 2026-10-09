@@ -1,0 +1,6 @@
+{
+  "name": "HealthPulse Nepal | स्वास्थ्यसेवा नेपाल",
+  "description": "All-in-one Nepali healthcare & hospital operating status directory, Bipanna Nagarik Upachar Kosh portal, doctor directory, and AI health assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
